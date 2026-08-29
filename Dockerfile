@@ -23,6 +23,8 @@ COPY prisma ./prisma
 RUN npm ci --omit=dev && npm install ts-node@10.9.2 typescript@5.7.2 && npx prisma generate
 
 COPY --from=builder /app/dist ./dist
+# The query console served at /.
+COPY public ./public
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh && chown -R node:node /app
 
