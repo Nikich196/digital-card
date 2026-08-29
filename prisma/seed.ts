@@ -1,6 +1,26 @@
 import { PrismaClient, SkillCategory, SkillLevel } from '@prisma/client';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+/**
+ * Путь к profile.json определяется поиском, а не предположением: тот же файл
+ * запускается и как prisma/seed.ts под ts-node, и как dist/prisma/seed.js
+ * обычным node в контейнере. Фиксированное число переходов вверх верно ровно
+ * для одного из двух случаев.
+ */
+function resolveDataFile(): string {
+  const candidates = [
+    join(__dirname, 'data', 'profile.json'), // prisma/ — запуск из исходников
+    join(__dirname, '..', '..', 'prisma', 'data', 'profile.json'), // dist/prisma/
+    join(process.cwd(), 'prisma', 'data', 'profile.json'),
+  ];
+  const found = candidates.find((path) => existsSync(path));
+  if (!found) {
+    throw new Error(`profile.json не найден. Проверено: ${candidates.join(', ')}`);
+  }
+  return found;
+}
 
 const prisma = new PrismaClient();
 
@@ -36,7 +56,7 @@ interface ProfileData {
  * therefore safe, and editing profile.json is enough to update the card.
  */
 async function main(): Promise<void> {
-  const raw = await readFile(join(__dirname, 'data', 'profile.json'), 'utf8');
+  const raw = await readFile(resolveDataFile(), 'utf8');
   const data = JSON.parse(raw) as ProfileData;
 
   await prisma.$transaction(async (tx) => {

@@ -76,7 +76,7 @@ jobs:
 
       - name: Заполнение идемпотентно — второй прогон не плодит дубли
         run: |
-          docker compose exec -T api npx prisma db seed
+          docker compose exec -T api node dist/prisma/seed.js
           node scripts/smoke.mjs http://localhost:3000/graphql
 
       - name: Логи при падении

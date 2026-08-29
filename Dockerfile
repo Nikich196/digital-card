@@ -25,8 +25,12 @@ RUN apk add --no-cache dumb-init openssl
 
 COPY package*.json ./
 COPY prisma ./prisma
-# ts-node is kept on purpose: `prisma db seed` runs the TypeScript seed script.
-RUN npm ci --omit=dev && npm install ts-node@10.9.2 typescript@5.7.2 && npx prisma generate
+# Prisma CLI ставится явно, хотя в package.json она dev-зависимость. Иначе
+# `npx prisma migrate deploy` на старте не находит её локально и тянет из
+# реестра — контейнеру нужен интернет при каждом запуске, а на закрытой сети
+# он просто не поднимется. Версия совпадает с @prisma/client из локфайла.
+# ts-node в рантайме не нужен: сид выполняется уже скомпилированным.
+RUN npm ci --omit=dev && npm install prisma@5.22.0 && npx prisma generate
 
 COPY --from=builder /app/dist ./dist
 # The query console served at /.

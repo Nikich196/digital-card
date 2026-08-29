@@ -8,7 +8,9 @@ echo "==> applying migrations"
 npx prisma migrate deploy
 
 echo "==> seeding profile data"
-npx prisma db seed
+# Напрямую скомпилированным файлом, а не через `prisma db seed`: та
+# команда запускает seed.ts под ts-node, которого в рантайм-образе нет.
+node dist/prisma/seed.js
 
 echo "==> starting application"
 exec "$@"
