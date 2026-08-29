@@ -2,6 +2,12 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
+# Ставится до npm ci, и это принципиально. Postinstall Prisma на этом шаге
+# определяет платформу и тянет ровно один движок. Без openssl в Alpine
+# определение проваливается, Prisma откатывается на сборку под OpenSSL 1.1,
+# а такой библиотеки в образе нет — движок потом не грузится вообще.
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 COPY prisma ./prisma
 RUN npm ci
@@ -15,7 +21,7 @@ FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init openssl
 
 COPY package*.json ./
 COPY prisma ./prisma
