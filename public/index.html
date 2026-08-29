@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Card API</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f6f5e'/%3E%3Cpath d='M9 21V11h3.4l3.6 6 3.6-6H23v10h-2.7v-5.6L17 21h-2l-3.3-5.6V21z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #fbfbfa;
+    --surface: #ffffff;
+    --line: #e4e4e1;
+    --fg: #1c1c1a;
+    --muted: #6b6b66;
+    --accent: #2f6f5e;
+    --code-bg: #f4f4f2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131313;
+      --surface: #1a1a19;
+      --line: #2c2c2a;
+      --fg: #ececeb;
+      --muted: #97978f;
+      --accent: #6dbfa5;
+      --code-bg: #202020;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131313;
+    --surface: #1a1a19;
+    --line: #2c2c2a;
+    --fg: #ececeb;
+    --muted: #97978f;
+    --accent: #6dbfa5;
+    --code-bg: #202020;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.6 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 7vw, 5rem) 1.25rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .eyebrow {
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 .6rem;
+  }
+  h1 {
+    font-size: clamp(1.7rem, 4.5vw, 2.4rem);
+    line-height: 1.2;
+    margin: 0 0 .75rem;
+    text-wrap: balance;
+    letter-spacing: -.02em;
+  }
+  .lede { margin: 0; color: var(--muted); max-width: 34rem; }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: 1.6rem;
+    padding: .7rem 1.15rem;
+    border-radius: 7px;
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .cta:hover { opacity: .9; }
+  a:focus-visible, .cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  h2 {
+    font-size: .8rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 1rem;
+    font-weight: 600;
+  }
+
+  .grid { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  @media (min-width: 34rem) { .grid { grid-template-columns: 1fr 1fr; } }
+  .cell { background: var(--surface); padding: 1.1rem 1.2rem; }
+  .cell h3 { margin: 0 0 .35rem; font-size: .95rem; }
+  .cell p { margin: 0; font-size: .875rem; color: var(--muted); }
+
+  pre {
+    margin: 0;
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font: .8125rem/1.65 ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  }
+  footer { color: var(--muted); font-size: .8125rem; border-top: 1px solid var(--line); padding-top: 1.5rem; }
+  footer a { color: var(--accent); }
+
+  /* Консоль запросов. Собственная, а не Apollo Sandbox: тот тянется с внешнего
+     CDN и молча не открывается там, где CDN недоступен. */
+  .console { display: flex; flex-direction: column; gap: .75rem; }
+  textarea {
+    width: 100%;
+    min-height: 15rem;
+    resize: vertical;
+    background: var(--code-bg);
+    color: var(--fg);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 1rem 1.1rem;
+    font: .8125rem/1.65 ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    tab-size: 2;
+  }
+  textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row { display: flex; align-items: center; gap: .85rem; flex-wrap: wrap; }
+  button.run {
+    padding: .55rem 1.05rem;
+    border-radius: 7px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+    font: inherit;
+    font-weight: 600;
+    font-size: .875rem;
+    cursor: pointer;
+  }
+  button.run:disabled { opacity: .55; cursor: default; }
+  .samples { display: flex; gap: .6rem; flex-wrap: wrap; }
+  .samples button {
+    padding: .4rem .7rem;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    font: inherit;
+    font-size: .8125rem;
+    cursor: pointer;
+  }
+  .samples button:hover { color: var(--fg); border-color: var(--accent); }
+  .meta { font-size: .8125rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  output { display: block; }
+  output pre { max-height: 24rem; overflow: auto; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">GraphQL API · тестовое задание</p>
+    <h1>Цифровая визитка</h1>
+    <p class="lede">
+      Сервис на NestJS, Prisma и PostgreSQL: одна анкета со связанными
+      ссылками, навыками, опытом и проектами — отдаётся одним GraphQL-запросом
+      любой вложенности.
+    </p>
+    <a class="cta" href="#try">Выполнить запрос →</a>
+    <p class="meta" style="margin:.9rem 0 0">Эндпоинт — <code>POST /graphql</code></p>
+  </header>
+
+  <section>
+    <h2>Что внутри</h2>
+    <div class="grid">
+      <div class="cell">
+        <h3>Без N+1</h3>
+        <p>DataLoader на каждый запрос. Полная выборка со всей вложенностью — ровно 6 SQL-запросов, по одному на таблицу.</p>
+      </div>
+      <div class="cell">
+        <h3>Ограничение глубины</h3>
+        <p>Своё правило валидации отсекает слишком вложенные запросы до того, как они дойдут до базы.</p>
+      </div>
+      <div class="cell">
+        <h3>Чистые ошибки</h3>
+        <p>Наружу уходят только коды из белого списка. Внутренние падения маскируются.</p>
+      </div>
+      <div class="cell">
+        <h3>Докер и миграции</h3>
+        <p>Многоступенчатая сборка, запуск не от root, миграции и сид — при старте контейнера.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="console" id="try">
+    <h2>Попробовать</h2>
+    <div class="samples">
+      <button type="button" data-sample="full">Вся визитка</button>
+      <button type="button" data-sample="slug">Поиск по slug</button>
+      <button type="button" data-sample="health">Состояние сервиса</button>
+      <button type="button" data-sample="missing">Несуществующий профиль</button>
+    </div>
+    <textarea id="query" spellcheck="false" aria-label="GraphQL-запрос"></textarea>
+    <div class="row">
+      <button class="run" id="run" type="button">Выполнить</button>
+      <span class="meta" id="meta"></span>
+    </div>
+    <output id="out" aria-live="polite"></output>
+  </section>
+
+  <footer>
+    Исходный код и README —
+    <a href="https://github.com/Nikich196/digital-card">github.com/Nikich196/digital-card</a>
+  </footer>
+</main>
+
+<script>
+  const SAMPLES = {
+    full: `{
+  profile {
+    name
+    headline
+    location
+    links { label url }
+    skills { name category level }
+    experiences {
+      company
+      position
+      isCurrent
+      achievements { text }
+    }
+    projects { name url stack }
+  }
+}`,
+    slug: `{
+  profile(slug: "nikita-satsiuk") {
+    slug
+    name
+    headline
+  }
+}`,
+    health: `{
+  health {
+    status
+    uptimeSeconds
+    databaseLatencyMs
+  }
+}`,
+    // Показывает, что наружу уходит понятный код ошибки, а не стек.
+    missing: `{
+  profile(slug: "no-such-profile") {
+    name
+  }
+}`,
+  };
+
+  const $query = document.getElementById('query');
+  const $run = document.getElementById('run');
+  const $out = document.getElementById('out');
+  const $meta = document.getElementById('meta');
+
+  $query.value = SAMPLES.full;
+
+  for (const button of document.querySelectorAll('.samples button')) {
+    button.addEventListener('click', () => {
+      $query.value = SAMPLES[button.dataset.sample];
+      $out.textContent = '';
+      $meta.textContent = '';
+    });
+  }
+
+  async function run() {
+    $run.disabled = true;
+    $meta.textContent = 'выполняется…';
+    const started = performance.now();
+    try {
+      const response = await fetch('/graphql', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ query: $query.value }),
+      });
+      const body = await response.json();
+      const ms = Math.round(performance.now() - started);
+      $out.innerHTML = '<pre></pre>';
+      $out.firstChild.textContent = JSON.stringify(body, null, 2);
+      $meta.textContent = `HTTP ${response.status} · ${ms} мс`;
+    } catch (error) {
+      $out.innerHTML = '<pre></pre>';
+      $out.firstChild.textContent = String(error);
+      $meta.textContent = 'запрос не ушёл';
+    } finally {
+      $run.disabled = false;
+    }
+  }
+
+  $run.addEventListener('click', run);
+  // Ctrl/Cmd+Enter — привычное сочетание для отправки запроса.
+  $query.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') run();
+  });
+</script>
+</body>
+</html>

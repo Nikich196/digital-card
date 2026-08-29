@@ -2,6 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run vercel-build",
   "framework": null,
+  "outputDirectory": "public",
+  "regions": ["fra1"],
   "functions": {
     "api/index.js": {
       "maxDuration": 30,
