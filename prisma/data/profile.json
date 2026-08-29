@@ -195,8 +195,9 @@
     },
     {
       "name": "Digital Card API",
+      "description": "GraphQL backend for this very profile: NestJS, Prisma, PostgreSQL, Docker. Nested data is batched per request, so a fully nested query costs one query per table.",
       "url": "https://github.com/Nikich196/digital-card",
-      "summary": "GraphQL backend for this very profile: NestJS, Prisma, PostgreSQL, Docker. Nested data is batched per request, so a fully nested query costs one query per table.",
+      "repositoryUrl": null,
       "stack": [
         "TypeScript",
         "NestJS",
