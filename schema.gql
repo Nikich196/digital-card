@@ -1,0 +1,100 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""A concrete, verifiable outcome of a role."""
+type Achievement {
+  id: ID!
+  position: Int!
+  text: String!
+}
+
+"""A period of work at one company."""
+type Experience {
+  achievements: [Achievement!]!
+  company: String!
+
+  """ISO date, null while ongoing."""
+  finishedAt: String
+  id: ID!
+
+  """Derived from finishedAt."""
+  isCurrent: Boolean!
+  position: String!
+
+  """ISO date, first day of the role."""
+  startedAt: String!
+  summary: String!
+}
+
+"""External professional link."""
+type Link {
+  id: ID!
+
+  """Display label, e.g. "GitHub"."""
+  label: String!
+
+  """Sort order, ascending."""
+  position: Int!
+  url: String!
+}
+
+"""Everything the digital business card exposes."""
+type Profile {
+  description: String!
+  email: String!
+  experiences: [Experience!]!
+
+  """One-line professional headline."""
+  headline: String!
+  id: ID!
+  links: [Link!]!
+  location: String!
+  name: String!
+  projects: [Project!]!
+  skills: [Skill!]!
+
+  """Stable key used to look the profile up."""
+  slug: String!
+}
+
+"""A shipped project."""
+type Project {
+  description: String!
+  id: ID!
+  name: String!
+  repositoryUrl: String
+
+  """Technologies used."""
+  stack: [String!]!
+
+  """Live URL, if published."""
+  url: String
+}
+
+type Query {
+  """The digital business card."""
+  profile(slug: String): Profile!
+}
+
+"""A single skill with a self-assessed level."""
+type Skill {
+  category: SkillCategory!
+  id: ID!
+  level: SkillLevel!
+  name: String!
+}
+
+enum SkillCategory {
+  DATABASE
+  FRAMEWORK
+  INFRASTRUCTURE
+  LANGUAGE
+  TOOLING
+}
+
+enum SkillLevel {
+  ADVANCED
+  BASIC
+  INTERMEDIATE
+}

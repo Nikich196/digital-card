@@ -1,0 +1,197 @@
+{
+  "slug": "nikita-satsiuk",
+  "name": "Nikita Satsiuk",
+  "headline": "AI-native full-stack developer — TypeScript, NestJS, PostgreSQL",
+  "description": "I build web products end to end: database schema, backend, frontend, mobile app, deployment. My main product is bloomly.by, a flower-subscription marketplace I designed and shipped alone — 65 PostgreSQL tables, card acquiring with idempotent payment handling, a Next.js web app and a React Native mobile app. I work with AI agents as a professional tool: I set the architecture and the module boundaries, and every result that matters is verified by a second, independent computation.",
+  "location": "Brest, Belarus (remote, UTC+3)",
+  "email": "nikich.2018.s@gmail.com",
+  "links": [
+    {
+      "label": "GitHub",
+      "url": "https://github.com/Nikich196"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/nikita-satsiuk-8b43b1431/"
+    },
+    {
+      "label": "Bloomly",
+      "url": "https://bloomly.by"
+    },
+    {
+      "label": "Telegram",
+      "url": "https://t.me/Nikich1405"
+    }
+  ],
+  "skills": [
+    {
+      "name": "TypeScript",
+      "category": "LANGUAGE",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "JavaScript",
+      "category": "LANGUAGE",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "SQL / PL-pgSQL",
+      "category": "LANGUAGE",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "Python",
+      "category": "LANGUAGE",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "Go",
+      "category": "LANGUAGE",
+      "level": "BASIC"
+    },
+    {
+      "name": "NestJS",
+      "category": "FRAMEWORK",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "Next.js",
+      "category": "FRAMEWORK",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "React",
+      "category": "FRAMEWORK",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "React Native / Expo",
+      "category": "FRAMEWORK",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "GraphQL",
+      "category": "FRAMEWORK",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "PostgreSQL",
+      "category": "DATABASE",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "Prisma",
+      "category": "DATABASE",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "Supabase",
+      "category": "DATABASE",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "Docker",
+      "category": "INFRASTRUCTURE",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "Cloudflare Workers",
+      "category": "INFRASTRUCTURE",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "Linux / VPS",
+      "category": "INFRASTRUCTURE",
+      "level": "INTERMEDIATE"
+    },
+    {
+      "name": "Git",
+      "category": "TOOLING",
+      "level": "ADVANCED"
+    },
+    {
+      "name": "Claude Code",
+      "category": "TOOLING",
+      "level": "ADVANCED"
+    }
+  ],
+  "experiences": [
+    {
+      "company": "Bloomly LLC",
+      "position": "Founder, Full-stack developer",
+      "startedAt": "2026-03-01",
+      "finishedAt": null,
+      "summary": "Flower-subscription marketplace bloomly.by. Sole developer: architecture, database, backend, frontend, mobile app, deployment and support.",
+      "achievements": [
+        "Designed a PostgreSQL schema of 65 tables with 83 idempotent migrations, 136 indexes and 70 PL/pgSQL functions; money logic lives in the database, not in application code.",
+        "Built the payment core as a PL/pgSQL state machine with row locking and idempotency keys, so a replayed bank webhook cannot settle an order twice.",
+        "Integrated Alfa-Bank card acquiring and the national ERIP system: order registration, status reconciliation, refunds, merchant payouts, HMAC webhook signature verification.",
+        "Shipped a Next.js 16 web app — 84 pages, 184 Server Actions, three isolated dashboards — and a React Native app with 47 screens.",
+        "Ran six security review cycles: column-level privilege separation, hardening of money paths, an XSS fix in a WebView-rendered template."
+      ]
+    },
+    {
+      "company": "Freelance",
+      "position": "Web developer",
+      "startedAt": "2026-01-01",
+      "finishedAt": null,
+      "summary": "Sites and web applications for small business: markup, server side, domain, deployment and support — the whole project owned by one person.",
+      "achievements": [
+        "Built a bilingual corporate site for a wholesale fruit supplier on Next.js with next-intl: hreflang and canonical tags, static generation of both locales, 209 translation keys at full parity.",
+        "Automated an outbound sales pipeline: per-prospect offer page generator, outreach over the Telegram MTProto protocol, publishing to GitHub Pages."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Bloomly",
+      "description": "Live flower-subscription marketplace with card acquiring, three isolated dashboards and a mobile app.",
+      "url": "https://bloomly.by",
+      "repositoryUrl": null,
+      "stack": [
+        "TypeScript",
+        "Next.js",
+        "React Native",
+        "PostgreSQL",
+        "PL/pgSQL",
+        "Supabase"
+      ]
+    },
+    {
+      "name": "Telegram assistant on Cloudflare Workers",
+      "description": "Personal assistant running 24/7: an LLM through Workers AI, state in KV, a cron tick every minute, voice transcription and scheduled reminders.",
+      "url": null,
+      "repositoryUrl": null,
+      "stack": [
+        "JavaScript",
+        "Cloudflare Workers",
+        "Workers AI",
+        "KV",
+        "Telegram Bot API"
+      ]
+    },
+    {
+      "name": "WiFiSense",
+      "description": "Motion detector based on Wi-Fi signal-strength fluctuation: 1,575 lines of dependency-free Python, Windows Native WiFi API through ctypes, detection threshold derived from data — zero false positives across 9,720 quiet samples.",
+      "url": null,
+      "repositoryUrl": null,
+      "stack": [
+        "Python",
+        "ctypes",
+        "Windows Native WiFi API"
+      ]
+    },
+    {
+      "name": "Sober League",
+      "description": "Shared-leaderboard tracker with a PWA client and offline support.",
+      "url": "https://sober-league-seven.vercel.app",
+      "repositoryUrl": null,
+      "stack": [
+        "TypeScript",
+        "Next.js",
+        "Supabase",
+        "PWA"
+      ]
+    }
+  ]
+}

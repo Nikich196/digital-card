@@ -1,0 +1,126 @@
+// Schema is intentionally normalised: every nested GraphQL field maps to its own
+// table, so the resolver layer has to solve the N+1 problem explicitly
+// (see src/common/dataloader). That is the interesting part of this task.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id          String   @id @default(uuid()) @db.Uuid
+  /// Stable human-readable key. Seeding upserts on it, so the seed is idempotent.
+  slug        String   @unique
+  name        String
+  headline    String
+  description String
+  location    String
+  email       String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  links       Link[]
+  skills      Skill[]
+  experiences Experience[]
+  projects    Project[]
+
+  @@map("profiles")
+}
+
+model Link {
+  id        String  @id @default(uuid()) @db.Uuid
+  profileId String  @map("profile_id") @db.Uuid
+  label     String
+  url       String
+  position  Int
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, label])
+  @@index([profileId, position])
+  @@map("links")
+}
+
+enum SkillCategory {
+  LANGUAGE
+  FRAMEWORK
+  DATABASE
+  INFRASTRUCTURE
+  TOOLING
+
+  @@map("skill_category")
+}
+
+enum SkillLevel {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+
+  @@map("skill_level")
+}
+
+model Skill {
+  id        String        @id @default(uuid()) @db.Uuid
+  profileId String        @map("profile_id") @db.Uuid
+  name      String
+  category  SkillCategory
+  level     SkillLevel
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, name])
+  @@index([profileId, category])
+  @@map("skills")
+}
+
+model Experience {
+  id         String    @id @default(uuid()) @db.Uuid
+  profileId  String    @map("profile_id") @db.Uuid
+  company    String
+  position   String
+  summary    String
+  startedAt  DateTime  @map("started_at") @db.Date
+  /// NULL means "current role" — the GraphQL layer turns it into isCurrent.
+  finishedAt DateTime? @map("finished_at") @db.Date
+
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  achievements Achievement[]
+
+  @@unique([profileId, company, position])
+  @@index([profileId, startedAt])
+  @@map("experiences")
+}
+
+model Achievement {
+  id           String @id @default(uuid()) @db.Uuid
+  experienceId String @map("experience_id") @db.Uuid
+  text         String
+  position     Int
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@unique([experienceId, position])
+  @@index([experienceId, position])
+  @@map("achievements")
+}
+
+model Project {
+  id            String   @id @default(uuid()) @db.Uuid
+  profileId     String   @map("profile_id") @db.Uuid
+  name          String
+  description   String
+  url           String?
+  repositoryUrl String?  @map("repository_url")
+  stack         String[]
+  position      Int
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, name])
+  @@index([profileId, position])
+  @@map("projects")
+}
