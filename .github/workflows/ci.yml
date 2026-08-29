@@ -8,6 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Ни один шаг здесь к базе не подключается, но Prisma отказывается читать
+    # схему, пока переменные из env() не разрешаются. Значения заведомо
+    # нерабочие — это заглушки, а не доступы.
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
     steps:
       - uses: actions/checkout@v4
 
