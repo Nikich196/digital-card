@@ -13,7 +13,6 @@
     "db:seed": "prisma db seed",
     "db:setup": "npm run db:deploy && npm run db:seed",
     "prisma:generate": "prisma generate",
-    "lint": "eslint \"{src,prisma}/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit",
     "vercel-build": "prisma generate && nest build",
     "smoke": "node scripts/smoke.mjs"

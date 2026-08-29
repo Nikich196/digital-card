@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ID, ObjectType } from '@nestjs/graphql';
 
 import { Achievement } from './achievement.model';
 
@@ -16,10 +16,13 @@ export class Experience {
   @Field()
   summary!: string;
 
-  @Field(() => String, { description: 'ISO date, first day of the role.' })
+  // Declared as GraphQLISODateTime rather than String: a Date behind a String
+  // field is serialised with String(), which yields epoch milliseconds — the
+  // opposite of what the description promises.
+  @Field(() => GraphQLISODateTime, { description: 'First day of the role.' })
   startedAt!: Date;
 
-  @Field(() => String, { nullable: true, description: 'ISO date, null while ongoing.' })
+  @Field(() => GraphQLISODateTime, { nullable: true, description: 'Null while ongoing.' })
   finishedAt!: Date | null;
 
   @Field(() => Boolean, { description: 'Derived from finishedAt.' })

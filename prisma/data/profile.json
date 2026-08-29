@@ -160,7 +160,7 @@
     {
       "name": "Telegram assistant on Cloudflare Workers",
       "description": "Personal assistant running 24/7: an LLM through Workers AI, state in KV, a cron tick every minute, voice transcription and scheduled reminders.",
-      "url": null,
+      "url": "https://github.com/Nikich196",
       "repositoryUrl": null,
       "stack": [
         "JavaScript",
@@ -173,7 +173,7 @@
     {
       "name": "WiFiSense",
       "description": "Motion detector based on Wi-Fi signal-strength fluctuation: 1,575 lines of dependency-free Python, Windows Native WiFi API through ctypes, detection threshold derived from data — zero false positives across 9,720 quiet samples.",
-      "url": null,
+      "url": "https://github.com/Nikich196",
       "repositoryUrl": null,
       "stack": [
         "Python",
@@ -184,13 +184,26 @@
     {
       "name": "Sober League",
       "description": "Shared-leaderboard tracker with a PWA client and offline support.",
-      "url": "https://sober-league-seven.vercel.app",
+      "url": "https://github.com/Nikich196/sober-league",
       "repositoryUrl": null,
       "stack": [
         "TypeScript",
         "Next.js",
         "Supabase",
         "PWA"
+      ]
+    },
+    {
+      "name": "Digital Card API",
+      "url": "https://github.com/Nikich196/digital-card",
+      "summary": "GraphQL backend for this very profile: NestJS, Prisma, PostgreSQL, Docker. Nested data is batched per request, so a fully nested query costs one query per table.",
+      "stack": [
+        "TypeScript",
+        "NestJS",
+        "Prisma",
+        "GraphQL",
+        "PostgreSQL",
+        "Docker"
       ]
     }
   ]
