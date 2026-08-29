@@ -6,9 +6,12 @@ import { Module } from '@nestjs/common';
 import { join } from 'node:path';
 
 import { DataLoaderModule } from './common/dataloader/dataloader.module';
+import { HealthModule } from './health/health.module';
 import { LoaderFactory } from './common/dataloader/loader.factory';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
+import { depthLimit } from './common/graphql/depth-limit.rule';
+import { formatError } from './common/graphql/format-error';
 import { envValidationSchema } from './config/env.validation';
 
 @Module({
@@ -24,7 +27,9 @@ import { envValidationSchema } from './config/env.validation';
       imports: [DataLoaderModule],
       inject: [ConfigService, LoaderFactory],
       useFactory: (config: ConfigService, loaderFactory: LoaderFactory) => ({
-        autoSchemaFile: join(process.cwd(), 'schema.gql'),
+        // On Vercel the filesystem is read-only, so the schema is kept in
+        // memory; locally it is written out to be committed and reviewed.
+        autoSchemaFile: process.env.VERCEL ? true : join(process.cwd(), 'schema.gql'),
         sortSchema: true,
         playground: false,
         introspection: config.get<boolean>('GRAPHQL_PLAYGROUND', true),
@@ -32,11 +37,16 @@ import { envValidationSchema } from './config/env.validation';
         plugins: config.get<boolean>('GRAPHQL_PLAYGROUND', true)
           ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
           : [],
+        // The endpoint is public, so an arbitrarily deep query is rejected at
+        // validation time — before any row is read.
+        validationRules: [depthLimit(config.get<number>('MAX_QUERY_DEPTH', 8))],
+        formatError,
         // A fresh loader set per request: the cache must not outlive it.
         context: () => ({ loaders: loaderFactory.create() }),
       }),
     }),
     ProfileModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

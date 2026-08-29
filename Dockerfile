@@ -29,5 +29,8 @@ RUN chmod +x docker-entrypoint.sh && chown -R node:node /app
 USER node
 EXPOSE 3000
 
+# The container is only healthy once GraphQL answers and the database responds.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3   CMD node -e "fetch('http://127.0.0.1:3000/graphql',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:'{health{status}}'})}).then(r=>r.json()).then(d=>process.exit(d?.data?.health?.status==='ok'?0:1)).catch(()=>process.exit(1))"
+
 ENTRYPOINT ["dumb-init", "--", "./docker-entrypoint.sh"]
 CMD ["node", "dist/src/main.js"]

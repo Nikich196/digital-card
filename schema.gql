@@ -27,6 +27,18 @@ type Experience {
   summary: String!
 }
 
+"""Liveness and database connectivity."""
+type Health {
+  """Round-trip time of a trivial database query, ms."""
+  databaseLatencyMs: Float!
+
+  """"ok" when the database answered."""
+  status: String!
+
+  """Seconds since the process started."""
+  uptimeSeconds: Float!
+}
+
 """External professional link."""
 type Link {
   id: ID!
@@ -73,6 +85,9 @@ type Project {
 }
 
 type Query {
+  """Service and database health."""
+  health: Health!
+
   """The digital business card."""
   profile(slug: String): Profile!
 }

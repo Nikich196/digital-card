@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { GraphQLError } from 'graphql';
+import { Injectable } from '@nestjs/common';
 import { Profile } from '@prisma/client';
 
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -10,6 +11,11 @@ export class ProfileService {
   /**
    * The card exposes exactly one profile. When no slug is given we return the
    * oldest row, which keeps `query { profile { ... } }` working out of the box.
+   *
+   * A GraphQLError with an explicit code is thrown rather than Nest's
+   * NotFoundException: this service speaks only GraphQL, and an HTTP status
+   * would be a borrowed concept here. The code is what the error formatter
+   * uses to decide that the message is safe to show the client.
    */
   async findOne(slug?: string): Promise<Profile> {
     const profile = slug
@@ -17,8 +23,9 @@ export class ProfileService {
       : await this.prisma.profile.findFirst({ orderBy: { createdAt: 'asc' } });
 
     if (!profile) {
-      throw new NotFoundException(
-        slug ? `Profile "${slug}" not found` : 'No profile has been seeded yet',
+      throw new GraphQLError(
+        slug ? `Profile "${slug}" was not found` : 'No profile has been seeded yet',
+        { extensions: { code: 'NOT_FOUND' } },
       );
     }
     return profile;

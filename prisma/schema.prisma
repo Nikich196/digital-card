@@ -8,7 +8,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Runtime traffic goes through a connection pooler, which is what a
+  // serverless deployment needs. Migrations cannot run over a transaction
+  // pooler, so they use a direct connection instead.
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Profile {

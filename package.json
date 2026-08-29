@@ -14,7 +14,9 @@
     "db:setup": "npm run db:deploy && npm run db:seed",
     "prisma:generate": "prisma generate",
     "lint": "eslint \"{src,prisma}/**/*.ts\" --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "vercel-build": "prisma generate && nest build",
+    "smoke": "node scripts/smoke.mjs"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
