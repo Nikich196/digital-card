@@ -1,12 +1,28 @@
-import { GraphQLError, ValidationContext, ASTVisitor, FragmentDefinitionNode, SelectionSetNode, FieldNode, InlineFragmentNode, FragmentSpreadNode, OperationDefinitionNode } from 'graphql';
+import {
+  GraphQLError,
+  ValidationContext,
+  ASTVisitor,
+  FragmentDefinitionNode,
+  SelectionSetNode,
+  FieldNode,
+  InlineFragmentNode,
+  FragmentSpreadNode,
+  OperationDefinitionNode,
+} from 'graphql';
 
 /**
- * A public GraphQL endpoint accepts arbitrary queries, and this schema is
- * cyclic-friendly enough that a client can nest selections far deeper than any
- * legitimate use. Depth is the cheapest effective guard: it rejects the query
- * during validation, before a single row is read.
+ * A public GraphQL endpoint accepts arbitrary queries, so depth is checked
+ * during validation — before a single row is read.
  *
- * Written by hand rather than pulled from a package: it is ~40 lines, and the
+ * Today this schema is acyclic and only four levels deep
+ * (profile → experiences → achievements → scalar), so the default limit of 8
+ * never fires. The rule is here for the schema this one will become: the first
+ * back-reference (Experience.profile, say) makes unbounded nesting possible,
+ * and by then the guard should already exist rather than be written under
+ * pressure. Set MAX_QUERY_DEPTH to 3 to see it reject the deepest query the
+ * current schema allows.
+ *
+ * Written by hand rather than pulled from a package: it is ~60 lines, and the
  * popular library for this has been unmaintained for years.
  */
 export function depthLimit(maxDepth: number) {
@@ -19,12 +35,45 @@ export function depthLimit(maxDepth: number) {
       }
     }
 
-    /** Fragment spreads are expanded, so a fragment cannot smuggle depth in. */
-    const measure = (
-      selectionSet: SelectionSetNode | undefined,
-      depth: number,
-      visitedFragments: Set<string>,
-    ): number => {
+    /**
+     * Depth a fragment adds, measured once and reused.
+     *
+     * This memoisation is the whole reason the rule is safe to run on a public
+     * endpoint. A fragment's contribution does not depend on where it is
+     * spread, so it can be computed a single time. Expanding every spread
+     * separately — the obvious implementation — costs O(2^n) on a document
+     * where each fragment spreads the next one twice: perfectly valid, no
+     * cycles, about a kilobyte, and it pins the event loop for the better part
+     * of a minute. That turns the guard itself into the cheapest denial of
+     * service against the service it protects.
+     */
+    const fragmentDepth = new Map<string, number>();
+    const resolving = new Set<string>();
+
+    const depthOfFragment = (name: string): number => {
+      const cached = fragmentDepth.get(name);
+      if (cached !== undefined) {
+        return cached;
+      }
+      const fragment = fragments.get(name);
+      // An unknown fragment is KnownFragmentNamesRule's job; a cycle is
+      // NoFragmentCyclesRule's. Either way the document is rejected elsewhere,
+      // so contributing zero here is safe and keeps this rule terminating.
+      if (!fragment || resolving.has(name)) {
+        return 0;
+      }
+      resolving.add(name);
+      const depth = measure(fragment.selectionSet, 0);
+      resolving.delete(name);
+      // A depth measured while breaking a cycle is not the real one, so it is
+      // deliberately not cached.
+      if (!resolving.has(name)) {
+        fragmentDepth.set(name, depth);
+      }
+      return depth;
+    };
+
+    const measure = (selectionSet: SelectionSetNode | undefined, depth: number): number => {
       if (!selectionSet) {
         return depth;
       }
@@ -37,24 +86,13 @@ export function depthLimit(maxDepth: number) {
           if (field.name.value.startsWith('__')) {
             continue;
           }
-          deepest = Math.max(deepest, measure(field.selectionSet, depth + 1, visitedFragments));
+          deepest = Math.max(deepest, measure(field.selectionSet, depth + 1));
         } else if (selection.kind === 'InlineFragment') {
           const inline = selection as InlineFragmentNode;
-          deepest = Math.max(deepest, measure(inline.selectionSet, depth, visitedFragments));
+          deepest = Math.max(deepest, measure(inline.selectionSet, depth));
         } else {
           const spread = selection as FragmentSpreadNode;
-          const name = spread.name.value;
-          // Guard against recursive fragments, which would loop forever.
-          if (visitedFragments.has(name)) {
-            continue;
-          }
-          const fragment = fragments.get(name);
-          if (fragment) {
-            deepest = Math.max(
-              deepest,
-              measure(fragment.selectionSet, depth, new Set(visitedFragments).add(name)),
-            );
-          }
+          deepest = Math.max(deepest, depth + depthOfFragment(spread.name.value));
         }
       }
       return deepest;
@@ -62,7 +100,7 @@ export function depthLimit(maxDepth: number) {
 
     return {
       OperationDefinition(node: OperationDefinitionNode) {
-        const depth = measure(node.selectionSet, 0, new Set());
+        const depth = measure(node.selectionSet, 0);
         if (depth > maxDepth) {
           context.reportError(
             new GraphQLError(

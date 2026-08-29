@@ -18,13 +18,17 @@ export class ProfileService {
    * uses to decide that the message is safe to show the client.
    */
   async findOne(slug?: string): Promise<Profile> {
-    const profile = slug
-      ? await this.prisma.profile.findUnique({ where: { slug } })
+    // Именно «аргумент передан», а не «строка непустая»: profile(slug: "")
+    // — это запрос конкретного профиля, и молча подменять его на первый
+    // попавшийся означает отдать чужие данные вместо честного NOT_FOUND.
+    const askedForSlug = slug !== undefined && slug !== null;
+    const profile = askedForSlug
+      ? await this.prisma.profile.findUnique({ where: { slug: slug as string } })
       : await this.prisma.profile.findFirst({ orderBy: { createdAt: 'asc' } });
 
     if (!profile) {
       throw new GraphQLError(
-        slug ? `Profile "${slug}" was not found` : 'No profile has been seeded yet',
+        askedForSlug ? `Profile "${slug}" was not found` : 'No profile has been seeded yet',
         { extensions: { code: 'NOT_FOUND' } },
       );
     }

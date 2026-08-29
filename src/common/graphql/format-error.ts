@@ -30,5 +30,11 @@ export function formatError(formatted: GraphQLFormattedError): GraphQLFormattedE
     };
   }
 
-  return { message: 'Internal server error', path: formatted.path };
+  // Код остаётся даже у замаскированной ошибки: без него клиент не может
+  // отличить сбой сервера от своей ошибки и не знает, имеет ли смысл повтор.
+  return {
+    message: 'Internal server error',
+    path: formatted.path,
+    extensions: { code: 'INTERNAL_SERVER_ERROR' },
+  };
 }

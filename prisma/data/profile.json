@@ -113,6 +113,11 @@
       "name": "Claude Code",
       "category": "TOOLING",
       "level": "ADVANCED"
+    },
+    {
+      "name": "Node.js",
+      "category": "LANGUAGE",
+      "level": "INTERMEDIATE"
     }
   ],
   "experiences": [

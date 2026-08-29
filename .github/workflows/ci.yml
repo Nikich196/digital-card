@@ -36,9 +36,45 @@ jobs:
       - name: Build
         run: npm run build
 
+  # Собрать образ мало: контейнер может собраться и всё равно не подняться —
+  # именно так однажды и вышло, когда схеме не хватало переменной окружения,
+  # а CI оставалась зелёной. Поэтому здесь стек поднимается целиком и по нему
+  # прогоняется тот же смоук-тест, что и по живой версии.
   docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build the image
-        run: docker build -t digital-card:ci .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Поднять стек с нуля
+        run: docker compose up --build --detach
+
+      - name: Дождаться, пока сервис ответит
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS -X POST http://localhost:3000/graphql \
+                 -H 'content-type: application/json' \
+                 -d '{"query":"{ health { status } }"}' | grep -q '"ok"'; then
+              echo "сервис поднялся за ${i}с"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "сервис не поднялся за 60 секунд"
+          docker compose logs --no-color
+          exit 1
+
+      - name: Смоук-тест по контейнеру
+        run: node scripts/smoke.mjs http://localhost:3000/graphql
+
+      - name: Заполнение идемпотентно — второй прогон не плодит дубли
+        run: |
+          docker compose exec -T api npx prisma db seed
+          node scripts/smoke.mjs http://localhost:3000/graphql
+
+      - name: Логи при падении
+        if: failure()
+        run: docker compose logs --no-color
