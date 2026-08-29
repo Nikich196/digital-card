@@ -55,6 +55,11 @@ type Link {
 type Profile {
   description: String!
   email: String!
+
+  """
+  Alias of `experiences`, kept so the example query in the brief runs as written.
+  """
+  experience: [Experience!]!
   experiences: [Experience!]!
 
   """One-line professional headline."""

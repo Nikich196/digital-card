@@ -1,5 +1,4 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { Module } from '@nestjs/common';
@@ -12,6 +11,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
 import { depthLimit } from './common/graphql/depth-limit.rule';
 import { formatError } from './common/graphql/format-error';
+import { sandboxLandingPage } from './common/graphql/sandbox.plugin';
 import { envValidationSchema } from './config/env.validation';
 
 @Module({
@@ -34,9 +34,7 @@ import { envValidationSchema } from './config/env.validation';
         playground: false,
         introspection: config.get<boolean>('GRAPHQL_PLAYGROUND', true),
         // Apollo Sandbox is served at /graphql, as the task asks.
-        plugins: config.get<boolean>('GRAPHQL_PLAYGROUND', true)
-          ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
-          : [],
+        plugins: config.get<boolean>('GRAPHQL_PLAYGROUND', true) ? [sandboxLandingPage()] : [],
         // The endpoint is public, so an arbitrarily deep query is rejected at
         // validation time — before any row is read.
         validationRules: [depthLimit(config.get<number>('MAX_QUERY_DEPTH', 8))],

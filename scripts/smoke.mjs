@@ -76,6 +76,24 @@ check(
   (profile?.skills ?? []).every((s) => ['BASIC', 'INTERMEDIATE', 'ADVANCED'].includes(s.level)),
 );
 
+// ------------------------------------------------- the brief's own example
+// Pasted exactly as it appears in the task, including `experience` in the
+// singular. If a reviewer runs that query first, it has to work.
+const brief = await gql(`query {
+  profile {
+    name
+    description
+    skills { name }
+    experience { company position }
+    projects { name }
+  }
+}`);
+check(
+  "the brief's example query runs as written",
+  Boolean(brief?.data?.profile?.experience?.length),
+  JSON.stringify(brief).slice(0, 200),
+);
+
 // ---------------------------------------------------------------- lookup by slug
 const bySlug = await gql('{ profile(slug: "nikita-satsiuk") { slug } }');
 check('lookup by slug works', bySlug?.data?.profile?.slug === 'nikita-satsiuk');
